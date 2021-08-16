@@ -3874,13 +3874,17 @@ get_local_ip() {
 }
 
 get_public_ip() {
-    public_ipv4=$(wget "http://ipinfo.io/ip" -qO-)
+    ipv4=$(wget "http://ipinfo.io/ip" -qO-)
     
     ipv6_get=$(wget "http://ip6.me/api" -qO- | cut -c6-)
-    public_ipv6=${ipv6_get::-44}
+    ipv6=${ipv6_get::-44}
 
     if [[ "$ipv6" = "$ipv4" ]]; then
-        public_ipv6=""        
+        public_ipv6=""
+        public_ipv4=$ipv4
+    else
+        public_ipv4=$ipv4
+        public_ipv6=$ipv6
     fi
 }
 
