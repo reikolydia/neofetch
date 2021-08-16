@@ -81,7 +81,8 @@ print_info() {
     # info "Song" song
     # [[ "$player" ]] && prin "Music Player" "$player"
     info "Local IP" local_ip
-    info "Public IP" public_ip
+    info "Public IPv4" public_ipv4
+    info "public IPv6" public_ipv6
     # info "Users" users
     # info "Locale" locale  # This only works on glibc systems.
 
@@ -3876,12 +3877,10 @@ get_public_ip() {
     public_ipv4=$(wget "http://ipinfo.io/ip" -qO-)
     
     ipv6_get=$(wget "http://ip6.me/api" -qO- | cut -c6-)
-    ipv6=${ipv6_get::-44}
+    public_ipv6=${ipv6_get::-44}
 
     if [[ "$ipv6" = "$ipv4" ]]; then
-        ipv6=""
-    else
-        echo "\nPublic IPv6: $ipv6"
+        public_ipv6=""        
     fi
 }
 
@@ -5432,7 +5431,8 @@ get_args() {
                     info "Font" font
                     info "Song" song
                     info "Local IP" local_ip
-                    info "Public IP" public_ip
+                    info "Public IPv4" public_ipv4
+                    info "Public IPv6" public_ipv6
                     info "Users" users
 
                     info cols
