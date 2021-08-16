@@ -75,13 +75,13 @@ print_info() {
     info "Memory" memory
 
     # info "GPU Driver" gpu_driver  # Linux/macOS only
-    # info "Disk" disk
+    info "Disk" disk
     # info "Battery" battery
     # info "Font" font
     # info "Song" song
     # [[ "$player" ]] && prin "Music Player" "$player"
-    # info "Local IP" local_ip
-    # info "Public IP" public_ip
+    info "Local IP" local_ip
+    info "Public IP" public_ip
     # info "Users" users
     # info "Locale" locale  # This only works on glibc systems.
 
@@ -391,21 +391,6 @@ gtk3="on"
 
 
 # IP Address
-
-
-# Website to ping for the public IP
-#
-# Default: 'http://ident.me'
-# Values:  'url'
-# Flag:    --ip_host
-public_ip_host="http://ident.me"
-
-# Public IP timeout.
-#
-# Default: '2'
-# Values:  'int'
-# Flag:    --ip_timeout
-public_ip_timeout=2
 
 # Local IP interface
 #
@@ -3888,22 +3873,15 @@ get_local_ip() {
 }
 
 get_public_ip() {
-    if [[ ! -n "$public_ip_host" ]] && type -p dig >/dev/null; then
-        public_ip="$(dig +time=1 +tries=1 +short myip.opendns.com @resolver1.opendns.com)"
-       [[ "$public_ip" =~ ^\; ]] && unset public_ip
-    fi
+    public_ipv4=$(wget "http://ipinfo.io/ip" -qO-)
+    
+    ipv6_get=$(wget "http://ip6.me/api" -qO- | cut -c6-)
+    ipv6=${ipv6_get::-44}
 
-    if [[ ! -n "$public_ip_host" ]] && [[ -z "$public_ip" ]] && type -p drill >/dev/null; then
-        public_ip="$(drill myip.opendns.com @resolver1.opendns.com | \
-                     awk '/^myip\./ && $3 == "IN" {print $5}')"
-    fi
-
-    if [[ -z "$public_ip" ]] && type -p curl >/dev/null; then
-        public_ip="$(curl -L --max-time "$public_ip_timeout" -w '\n' "$public_ip_host")"
-    fi
-
-    if [[ -z "$public_ip" ]] && type -p wget >/dev/null; then
-        public_ip="$(wget -T "$public_ip_timeout" -qO- "$public_ip_host")"
+    if [[ "$ipv6" = "$ipv4" ]]; then
+        ipv6=""
+    else
+        echo "\nPublic IPv6: $ipv6"
     fi
 }
 
@@ -5049,7 +5027,6 @@ INFO:
 
     --disk_percent on/off       Hide/Show disk percent.
 
-    --ip_host url               URL to query for public IP
     --ip_timeout int            Public IP timeout (in seconds).
     --ip_interface value        Interface(s) to use for local IP
     --song_format format        Print the song data in a specific format (see config file).
@@ -5247,7 +5224,6 @@ get_args() {
             "--gtk3") gtk3="$2" ;;
             "--shell_path") shell_path="$2" ;;
             "--shell_version") shell_version="$2" ;;
-            "--ip_host") public_ip_host="$2" ;;
             "--ip_timeout") public_ip_timeout="$2" ;;
             "--ip_interface")
                 unset local_ip_interface
